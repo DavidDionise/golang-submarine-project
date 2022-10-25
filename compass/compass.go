@@ -1,12 +1,13 @@
 package compass
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
+	"com.pi/submarine/utils"
 	"github.com/tkanos/gonfig"
 	"periph.io/x/conn/v3/i2c"
 	"periph.io/x/conn/v3/i2c/i2creg"
@@ -14,16 +15,13 @@ import (
 )
 
 type Compass struct {
-	angle int
+	Angle int
 }
 
-func (c Compass) Start() {
+func (c *Compass) Start() {
 
 	config := CompassConfig{}
 	config.start()
-
-	fmt.Println("address: ", config.I2cAddress)
-	fmt.Println("milli: ", config.FetchRateMiliseconds)
 
 	_, err := host.Init()
 
@@ -53,6 +51,13 @@ func (c Compass) Start() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		angleValues := [2]byte{buf[1], buf[2]}
+		parsedAngle := utils.HexToInt(angleValues)
+
+		c.Angle = parsedAngle
+
+		log.Debug("Current angle: ", c.Angle)
 
 		time.Sleep(time.Duration(config.FetchRateMiliseconds * 1000000))
 	}

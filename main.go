@@ -1,7 +1,12 @@
 package main
 
-import "com.pi/submarine/compass"
+import (
+	"com.pi/submarine/compass"
+	"github.com/sirupsen/logrus"
+)
 
 func main() {
-	compass.Compass{}.Start()
+	logrus.SetLevel(logrus.DebugLevel)
+	c := compass.Compass{}
+	c.Start()
 }
