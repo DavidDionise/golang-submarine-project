@@ -53,9 +53,9 @@ func (c *Compass) Start() {
 		}
 
 		angleValues := [2]byte{buf[1], buf[2]}
-		parsedAngle := utils.HexToInt(angleValues)
+		angle := utils.HexToInt(angleValues) / 10
 
-		c.Angle = parsedAngle
+		c.Angle = angle
 
 		log.Debug("Current angle: ", c.Angle)
 
