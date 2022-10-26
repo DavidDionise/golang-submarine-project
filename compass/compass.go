@@ -1,7 +1,6 @@
 package compass
 
 import (
-	"os"
 	"strconv"
 	"time"
 
@@ -15,13 +14,12 @@ import (
 )
 
 type Compass struct {
-	Angle int
+	angle int
 }
 
 func (c *Compass) Start() {
 
-	config := CompassConfig{}
-	config.start()
+	config := newCompassConfig()
 
 	_, err := host.Init()
 
@@ -55,29 +53,37 @@ func (c *Compass) Start() {
 		angleValues := [2]byte{buf[1], buf[2]}
 		angle := utils.HexToInt(angleValues) / 10
 
-		c.Angle = angle
+		utils.Mutex.Lock()
+		c.angle = angle
+		utils.Mutex.Unlock()
 
-		log.Debug("Current angle: ", c.Angle)
+		log.Debug("Current angle: ", c.angle)
 
 		time.Sleep(time.Duration(config.FetchRateMiliseconds * 1000000))
 	}
 }
 
-type CompassConfig struct {
+func (c Compass) GetAngle() int {
+	utils.Mutex.Lock()
+	currentAngle := c.angle
+	utils.Mutex.Unlock()
+
+	return currentAngle
+}
+
+type compassConfig struct {
 	I2cAddress           string
 	FetchRateMiliseconds int
 }
 
-func (c *CompassConfig) start() {
-	dir, err := os.Getwd()
+func newCompassConfig() compassConfig {
+	config := &compassConfig{}
 
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = gonfig.GetConf(dir+"/compass/config.json", c)
+	err := gonfig.GetConf("compass-config.json", config)
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	return *config
 }

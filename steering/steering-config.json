@@ -1,0 +1,7 @@
+{
+  "Pin": 25,
+  "DefaultSetHead": 0,
+  "RateMilliseconds": 500,
+  "MaxAngle": -23,
+  "MinAngle": 23
+}
