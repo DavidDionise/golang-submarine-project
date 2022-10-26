@@ -8,15 +8,16 @@ import (
 
 	"com.pi/submarine/compass"
 	"github.com/cgxeiji/servo"
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/tkanos/gonfig"
 )
 
 type Steering struct{}
 
+var config = newSteeringConfig()
+
 func (s Steering) Start(compass *compass.Compass) {
-	config := newSteeringConfig()
+
 	defer servo.Close()
 
 	steeringServo := servo.New(config.Pin)
@@ -29,7 +30,7 @@ func (s Steering) Start(compass *compass.Compass) {
 
 	for {
 		nextAngle := calculateNextAngle(compass.GetAngle(), config.DefaultSetHead)
-		logrus.Debug("moving to angle: ", nextAngle)
+		log.Debug("moving to angle: ", nextAngle)
 		steeringServo.MoveTo(float64(nextAngle))
 		time.Sleep(500 * time.Millisecond)
 	}
@@ -58,15 +59,14 @@ func newSteeringConfig() steeringConfig {
 }
 
 func calculateNextAngle(currentRead int, setHead int) int {
-	config := newSteeringConfig()
 
 	angleOfDeviation := calculateAngleOfDeviation(currentRead, setHead)
 	var boundAngle int
 
 	if angleOfDeviation < 0 {
-		boundAngle = int(math.Min(float64(config.MinAngle), float64(angleOfDeviation)))
+		boundAngle = int(math.Max(float64(config.MinAngle), float64(angleOfDeviation)))
 	} else {
-		boundAngle = int(math.Max(float64(config.MaxAngle), float64(angleOfDeviation)))
+		boundAngle = int(math.Min(float64(config.MaxAngle), float64(angleOfDeviation)))
 	}
 
 	fmt.Println("bound angle: ", boundAngle)

@@ -12,10 +12,10 @@ import (
 
 type Motor struct{}
 
+var config = newMotorConfig()
+
 func (m Motor) Start(wg *sync.WaitGroup) {
 	defer servo.Close()
-
-	config := newMotorConfig()
 
 	motorServo := servo.New(config.Pin)
 	motorServo.SetPosition(float64(config.InitialSpeed))

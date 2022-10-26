@@ -18,9 +18,9 @@ type Compass struct {
 	angle int
 }
 
-func (c *Compass) Start() {
+var config = newCompassConfig()
 
-	config := newCompassConfig()
+func (c *Compass) Start() {
 
 	_, err := host.Init()
 
