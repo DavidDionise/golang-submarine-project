@@ -1,10 +1,14 @@
 package steering
 
 import (
+	"fmt"
 	"math"
+	"os"
+	"time"
 
 	"com.pi/submarine/compass"
 	"github.com/cgxeiji/servo"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/tkanos/gonfig"
 )
@@ -25,7 +29,9 @@ func (s Steering) Start(compass *compass.Compass) {
 
 	for {
 		nextAngle := calculateNextAngle(compass.GetAngle(), config.DefaultSetHead)
+		logrus.Debug("moving to angle: ", nextAngle)
 		steeringServo.MoveTo(float64(nextAngle))
+		time.Sleep(500 * time.Millisecond)
 	}
 }
 
@@ -39,7 +45,10 @@ type steeringConfig struct {
 
 func newSteeringConfig() steeringConfig {
 	config := &steeringConfig{}
-	err := gonfig.GetConf("steering-config.json", config)
+
+	cwd, _ := os.Getwd()
+
+	err := gonfig.GetConf(cwd+"/steering/steering-config.json", config)
 
 	if err != nil {
 		log.Fatal(err)
@@ -59,6 +68,8 @@ func calculateNextAngle(currentRead int, setHead int) int {
 	} else {
 		boundAngle = int(math.Max(float64(config.MaxAngle), float64(angleOfDeviation)))
 	}
+
+	fmt.Println("bound angle: ", boundAngle)
 
 	return boundAngle + 90
 }

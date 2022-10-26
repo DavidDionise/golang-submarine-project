@@ -1,9 +1,10 @@
 package motor
 
 import (
+	"os"
+	"sync"
 	"time"
 
-	"com.pi/submarine/utils"
 	"github.com/cgxeiji/servo"
 	log "github.com/sirupsen/logrus"
 	"github.com/tkanos/gonfig"
@@ -11,8 +12,7 @@ import (
 
 type Motor struct{}
 
-func (m Motor) Start() {
-	utils.WaitGroup.Add(1)
+func (m Motor) Start(wg *sync.WaitGroup) {
 	defer servo.Close()
 
 	config := newMotorConfig()
@@ -33,7 +33,7 @@ func (m Motor) Start() {
 
 	motorServo.MoveTo(90).Wait()
 
-	utils.WaitGroup.Done()
+	wg.Done()
 }
 
 type motorConfig struct {
@@ -45,7 +45,9 @@ type motorConfig struct {
 func newMotorConfig() motorConfig {
 	config := &motorConfig{}
 
-	err := gonfig.GetConf("motor-config.json", config)
+	cwd, _ := os.Getwd()
+
+	err := gonfig.GetConf(cwd+"/motor/motor-config.json", config)
 
 	if err != nil {
 		log.Fatal(err)

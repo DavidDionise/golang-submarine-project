@@ -1,6 +1,7 @@
 package compass
 
 import (
+	"os"
 	"strconv"
 	"time"
 
@@ -57,7 +58,7 @@ func (c *Compass) Start() {
 		c.angle = angle
 		utils.Mutex.Unlock()
 
-		log.Debug("Current angle: ", c.angle)
+		// log.Debug("Current angle: ", c.angle)
 
 		time.Sleep(time.Duration(config.FetchRateMiliseconds * 1000000))
 	}
@@ -79,7 +80,9 @@ type compassConfig struct {
 func newCompassConfig() compassConfig {
 	config := &compassConfig{}
 
-	err := gonfig.GetConf("compass-config.json", config)
+	cwd, _ := os.Getwd()
+
+	err := gonfig.GetConf(cwd+"/compass/compass-config.json", config)
 
 	if err != nil {
 		log.Fatal(err)
